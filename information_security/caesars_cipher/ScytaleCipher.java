@@ -8,40 +8,32 @@ import java.util.Scanner;
 
 public class ScytaleCipher implements EncryptionMethod {
 
-    public String encrypt(String initialText, int numOfEdges, int lengthOfEdge) {
+    public String encrypt(String initialText, int lengthOfEdge, int numOfEdges) {
         StringBuilder encryptedText = new StringBuilder();
         int n = initialText.length();
-        for (int i = 0; i < lengthOfEdge; i++) {
-            for (int j = 0; j < numOfEdges; j++) {
-                if (i + j * lengthOfEdge < n)
-                    encryptedText.append(initialText.charAt(i + j * lengthOfEdge));
+        for (int i = 0; i < numOfEdges; i++) {
+            for (int j = 0; j < lengthOfEdge; j++) {
+                if (i + j * numOfEdges < n)
+                    encryptedText.append(initialText.charAt(i + j * numOfEdges));
                 else encryptedText.append("*");
             }
         }
         return encryptedText.toString();
     }
 
-    public String decrypt(String encryptedText, int numOfEdges, int lengthOfEdge) {
+    public static String decrypt(String encryptedText, int lengthOfEdge, int numOfEdges) {
         StringBuilder decryptedText = new StringBuilder();
-        int n = encryptedText.length();
-//        for (int i = 0; i < lengthOfEdge; i++) {
-//            for (int j = 0; j < numOfEdges; j++) {
-//                if (i + j * lengthOfEdge < n)
-//                    decryptedText.append(encryptedText.charAt(i + j * lengthOfEdge));
-//                else decryptedText.append("*");
-//            }
-//        }
-        for (int i = 0; i < numOfEdges; i++) {
-            for (int j = 0; j < lengthOfEdge; j++) {
-                System.out.println(decryptedText);
-                decryptedText.append(encryptedText.charAt(i + j * numOfEdges));
+        for (int i = 0; i < lengthOfEdge; i++) {
+            for (int j = 0; j < numOfEdges; j++) {
+                decryptedText.append(encryptedText.charAt(i + j * lengthOfEdge));
             }
         }
-        return decryptedText.toString();
+        return decryptedText.toString().replace('*', ' ').trim();
     }
 
     private static String reduceOptions(String hackedText) {
         String response = hackedText;
+        if(hackedText.contains("  ")) return null;
         String[] impossibleTogether = {"ёя", "ёь", "ёэ", "ъж", "эё", "ъд", "цё", "уь", "щч", "чй", "шй", "шз", "ыф",
                 "жщ", "жш", "жц", "ыъ", "ыэ", "ыю", "ыь", "жй", "ыы", "жъ", "жы", "ъш", "пй", "ъщ", "зщ", "ъч", "ъц",
                 "ъу", "ъф", "ъх", "ъъ", "ъы", "ыо", "жя", "зй", "ъь", "ъэ", "ыа", "нй", "еь", "цй", "ьй", "ьл", "ьр",
@@ -53,8 +45,7 @@ public class ScytaleCipher implements EncryptionMethod {
         for (String impsblStr : impossibleTogether
         ) {
             if (hackedText.contains(impsblStr)) {
-                response = null;
-                break;
+                return null;
             }
         }
         return response;
@@ -62,17 +53,15 @@ public class ScytaleCipher implements EncryptionMethod {
 
     public static List<String> hack(String encryptedText) {
         List<String> decryptedText = new ArrayList<String>();
-        StringBuilder oneOption = new StringBuilder();
+        String oneOption;
         int n = encryptedText.length();
-        for (int numOfEdges = 2; numOfEdges < n; numOfEdges++) {
-            for (int i = 1; i < n - 1; i += numOfEdges) {
-                oneOption.append(encryptedText.charAt(i - 1));
+        for (int lenOfEdge = 1; lenOfEdge < n; lenOfEdge++) {
+            oneOption = decrypt(encryptedText, n / lenOfEdge, lenOfEdge);
+            if (oneOption.length() > 2) {
+                String checkedOption = reduceOptions(oneOption);
+                if (checkedOption != null) decryptedText.add(checkedOption);
+//                decryptedText.add(oneOption);
             }
-//            System.out.println("oneOption " + oneOption);
-            if (oneOption.length() > 2)
-                decryptedText.add(reduceOptions(oneOption.toString()));
-//            decryptedText.add(oneOption.toString());
-            oneOption = new StringBuilder();
         }
         return decryptedText;
     }
@@ -82,18 +71,18 @@ public class ScytaleCipher implements EncryptionMethod {
     public void showEncryption() {
         Scanner in = new Scanner(System.in);
 
-        System.out.print("Введите текст: ");
+        System.out.print("\nВведите текст: ");
         String text = in.nextLine().toLowerCase();
 
-        System.out.print("Введите количество рёбер цилиндра: ");
+        System.out.print("\nВведите количество рёбер цилиндра: ");
         int n = in.nextInt();
 
         System.out.print("Введите длину рёбер цилиндра: ");
         int len = in.nextInt();
 
-        String encryptedText = encrypt(text, n, len);
+        String encryptedText = encrypt(text, len, n);
 
-        System.out.println("Зашифрованный текст: ");
+        System.out.println("\nЗашифрованный текст: ");
         System.out.println(encryptedText);
     }
 
@@ -101,47 +90,43 @@ public class ScytaleCipher implements EncryptionMethod {
     public void showDecryption() {
         Scanner in = new Scanner(System.in);
 
-        System.out.print("Введите зашифрованный текст: ");
+        System.out.print("\nВведите зашифрованный текст: ");
         String text = in.nextLine().toLowerCase();
 
-        System.out.print("Введите количество рёбер цилиндра: ");
+        System.out.print("\nВведите количество рёбер цилиндра: ");
         int n = in.nextInt();
 
         System.out.print("Введите длину рёбер цилиндра: ");
         int len = in.nextInt();
 
-        System.out.println("Расшифрованный текст (варианты): ");
-        System.out.println(decrypt(text, n, len));
-
-        List<String> options = hack(text);
-        //для отладки удобнее List, потом заменить на HashSet?
-        System.out.println("options " + options);
-        options.forEach(System.out::println);
+        System.out.println("\nРасшифрованный текст: ");
+        System.out.println(decrypt(text, len, n));
     }
 
     @Override
     public void test() {
         Scanner in = new Scanner(System.in);
 
-        System.out.print("Введите текст: ");
+        System.out.print("\nВведите текст: ");
         String text = in.nextLine().toLowerCase();
 
-        System.out.print("Введите количество рёбер цилиндра: ");
+        System.out.print("\nВведите количество рёбер цилиндра: ");
         int n = in.nextInt();
 
         System.out.print("Введите длину рёбер цилиндра: ");
         int len = in.nextInt();
 
-        String encryptedText = encrypt(text, n, len);
+        String encryptedText = encrypt(text, len, n);
 
-        System.out.println("Зашифрованный текст: ");
+        System.out.println("\nЗашифрованный текст: ");
         System.out.println(encryptedText);
 
-        System.out.println(decrypt(encryptedText, n, len));
+        System.out.println("\nРасшифрованный текст: ");
+        System.out.println(decrypt(encryptedText, len, n));
 
+        System.out.println("\nВзломанный текст (варианты): ");
         List<String> options = hack(encryptedText);
         //для отладки удобнее List, потом заменить на HashSet?
-        System.out.println("options " + options);
         options.forEach(System.out::println);
     }
 

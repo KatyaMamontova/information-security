@@ -13,24 +13,27 @@ public class Application {
         Scanner in = new Scanner(System.in);
         encryptionMethod.chooseLanguage();
 
-        System.out.println("1 Зашифровать сообщение \n2 Расшифровать сообщение \n3 Тест");
+        System.out.println("\n1 Зашифровать сообщение \n2 Расшифровать сообщение \n3 Тест");
         int num = in.nextInt();
         switch (num) {
             case 1:
                 encryptionMethod.showEncryption();
+                break;
             case 2:
                 encryptionMethod.showDecryption();
+                break;
             case 3:
                 encryptionMethod.test();
+                break;
         }
         ;
     }
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
         while(true) {
-        System.out.println("1 Скитала (многогранник и бумажная лента) \n2 Квадрат Виженера");
+        System.out.println("\n\n1 Скитала (многогранник и бумажная лента) \n2 Квадрат Виженера");
 
-        System.out.print("Выберите метод шифрования: ");
+        System.out.print("\nВыберите метод шифрования: ");
         int cipher = Integer.parseInt(in.nextLine());
 
         encryptionMethod = switch(cipher) {
